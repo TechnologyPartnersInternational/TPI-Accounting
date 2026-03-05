@@ -1,0 +1,6 @@
+﻿actions/jobActions.ts(3,20): error TS2614: Module '"mongoose"' has no exported member 'FilterQuery'. Did you mean to use 'import FilterQuery from "mongoose"' instead?
+actions/jobActions.ts(39,11): error TS2304: Cannot find name 'connectToDatabase'.
+actions/jobActions.ts(62,11): error TS2304: Cannot find name 'connectToDatabase'.
+actions/jobActions.ts(108,11): error TS2304: Cannot find name 'connectToDatabase'.
+models/JobRecord.ts(51,35): error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.

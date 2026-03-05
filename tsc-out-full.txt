@@ -1,0 +1,1 @@
+actions/jobActions.ts(65,27): error TS2694: Namespace '"mongoose"' has no exported member 'FilterQuery'.
