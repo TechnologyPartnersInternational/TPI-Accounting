@@ -25,16 +25,17 @@ export interface JobRecordInput {
 }
 
 export interface JobFilters {
-  clientName?: string;
+  clientName?: string | string[];  // Support filtering by multiple clients
   searchQuery?: string;
   status?: string | string[];
+  category?: string | string[];    // New: Category filtering
   currency?: string;
   commencementStart?: string | Date;
   commencementEnd?: string | Date;
   expirationStart?: string | Date;
   expirationEnd?: string | Date;
-  startDate?: string | Date;
-  endDate?: string | Date;
+  startDate?: string | Date;  // Keep for backwards compatibility
+  endDate?: string | Date;    // Keep for backwards compatibility
   month?: number;
   year?: number;
 }
@@ -68,29 +69,50 @@ export async function getJobs(filters: JobFilters = {}): Promise<ActionResponse>
     
     const query: Record<string, unknown> = {};
     
+    // Keyword Text search (Title or Description)
     if (filters.searchQuery) {
       query.$or = [
         { clientName: { $regex: filters.searchQuery, $options: 'i' } },
         { jobDescription: { $regex: filters.searchQuery, $options: 'i' } }
       ];
-    } else if (filters.clientName) {
-      query.clientName = { $regex: filters.clientName, $options: 'i' };
+    } 
+    
+    // Client Name Exact or Array
+    if (filters.clientName) {
+      if (Array.isArray(filters.clientName)) {
+        query.clientName = { $in: filters.clientName };
+      } else {
+        query.clientName = { $regex: filters.clientName, $options: 'i' };
+      }
     }
     
+    // Status Array Filtering
     if (filters.status) {
       if (Array.isArray(filters.status)) {
         query.status = { $in: filters.status };
-      } else if (filters.status.includes(',')) {
+      } else if (typeof filters.status === 'string' && filters.status.includes(',')) {
         query.status = { $in: filters.status.split(',') };
       } else {
         query.status = filters.status;
       }
     }
+
+    // Category Array Filtering
+    if (filters.category) {
+      if (Array.isArray(filters.category)) {
+        query.category = { $in: filters.category };
+      } else if (typeof filters.category === 'string' && filters.category.includes(',')) {
+        query.category = { $in: filters.category.split(',') };
+      } else {
+        query.category = filters.category;
+      }
+    }
     
-    if (filters.currency) {
+    if (filters.currency && filters.currency !== 'BOTH') {
       query.currency = filters.currency;
     }
 
+    // Advanced Range Filtering for Dates
     if (filters.commencementStart || filters.commencementEnd) {
       const startDateQuery: Record<string, Date> = {};
       if (filters.commencementStart) startDateQuery.$gte = new Date(filters.commencementStart);
@@ -102,7 +124,8 @@ export async function getJobs(filters: JobFilters = {}): Promise<ActionResponse>
       const dueDateQuery: Record<string, Date> = {};
       if (filters.expirationStart) dueDateQuery.$gte = new Date(filters.expirationStart);
       if (filters.expirationEnd) dueDateQuery.$lte = new Date(filters.expirationEnd);
-      query.dueDate = dueDateQuery;
+      // Ensure we don't overwrite if backward compatibility blocks are also active
+      query.dueDate = { ...(query.dueDate as Record<string, Date>), ...dueDateQuery };
     }
     
     // Backwards compatibility for dashboard month queries
@@ -116,7 +139,10 @@ export async function getJobs(filters: JobFilters = {}): Promise<ActionResponse>
     if (filters.month && filters.year) {
       const startOfMonth = new Date(filters.year, filters.month - 1, 1);
       const endOfMonth = new Date(filters.year, filters.month, 0, 23, 59, 59, 999);
-      query.dueDate = { ...(query.dueDate as object || {}), $gte: startOfMonth, $lte: endOfMonth };
+      
+      // An active job for the month: startDate <= endOfMonth AND dueDate >= startOfMonth
+      query.startDate = { $lte: endOfMonth };
+      query.dueDate = { $gte: startOfMonth };
     }
     
     const jobs = await JobRecord.find(query).sort({ createdAt: -1 });
