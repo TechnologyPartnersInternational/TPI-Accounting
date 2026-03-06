@@ -125,7 +125,7 @@ export default function SearchJobsPage() {
                   <input 
                     type="text" 
                     placeholder="Exact client name..." 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                   />
@@ -137,7 +137,7 @@ export default function SearchJobsPage() {
                   <input 
                     type="text" 
                     placeholder="Search by Title or Description..." 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />

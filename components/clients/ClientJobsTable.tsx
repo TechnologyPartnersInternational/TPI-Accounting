@@ -56,16 +56,16 @@ export function ClientJobsTable({ jobs, clientName }: ClientJobsTableProps) {
 
   const handleExport = async () => {
     try {
-      const response = await fetch('/api/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filters: {
-            clientName: clientName,
-            status: statusFilter || undefined
-          }
-        })
+      // Build query string matching the current filters applied to the client
+      const params = new URLSearchParams({
+        clientName: clientName
       });
+      
+      if (statusFilter) params.append('status', statusFilter);
+      // Notice: we don't pass searchTerm as the export API expects structural filters, 
+      // but clientName strongly isolates the dataset.
+
+      const response = await fetch(`/api/export?${params.toString()}`);
       
       if (!response.ok) throw new Error('Export failed');
       
@@ -77,7 +77,7 @@ export function ClientJobsTable({ jobs, clientName }: ClientJobsTableProps) {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      a.remove();
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Error exporting data:', error);
       alert('Failed to generate export file. Please try again.');

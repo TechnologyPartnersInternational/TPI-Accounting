@@ -1,0 +1,10 @@
+actions/searchActions.ts(4,8): error TS2613: Module '"C:/Users/USER/Desktop/Wed development/tpi-accounting/models/Client"' has no default export. Did you mean to use 'import { Client } from "C:/Users/USER/Desktop/Wed development/tpi-accounting/models/Client"' instead?
+actions/searchActions.ts(5,8): error TS2613: Module '"C:/Users/USER/Desktop/Wed development/tpi-accounting/models/JobRecord"' has no default export. Did you mean to use 'import { JobRecord } from "C:/Users/USER/Desktop/Wed development/tpi-accounting/models/JobRecord"' instead?
+app/(dashboard)/page.tsx(84,34): error TS2740: Type '{}' is missing the following properties from type 'ClientSummary[]': length, pop, push, concat, and 35 more.
+app/(dashboard)/page.tsx(94,31): error TS2740: Type '{}' is missing the following properties from type 'JobData[]': length, pop, push, concat, and 35 more.
+app/(dashboard)/page.tsx(105,24): error TS2740: Type '{}' is missing the following properties from type 'JobData[]': length, pop, push, concat, and 35 more.
+components/dashboard/OutstandingDebtsChart.tsx(72,11): error TS2322: Type '(value: number) => [string, undefined]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: TooltipPayloadEntry, index: number, payload: TooltipPayload) => ReactNode | [...])'.
+  Type '(value: number) => [string, undefined]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
