@@ -65,7 +65,16 @@ export function ClientJobsTable({ jobs, clientName }: ClientJobsTableProps) {
       // Notice: we don't pass searchTerm as the export API expects structural filters, 
       // but clientName strongly isolates the dataset.
 
-      const response = await fetch(`/api/export?${params.toString()}`);
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filters: {
+            clientName: clientName,
+            status: statusFilter || undefined
+          }
+        })
+      });
       
       if (!response.ok) throw new Error('Export failed');
       
@@ -94,7 +103,7 @@ export function ClientJobsTable({ jobs, clientName }: ClientJobsTableProps) {
           <input 
             type="text" 
             placeholder="Search within client tasks..." 
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm text-[#0f172a]"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a] focus:border-transparent transition-all text-sm text-gray-900 placeholder-gray-500 bg-slate-50"
             value={searchTerm}
             onChange={(e) => {
                 setSearchTerm(e.target.value);

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SearchSummaryBar } from '@/components/jobs/SearchSummaryBar';
 import { SearchResultsTable } from '@/components/jobs/SearchResultsTable';
 import { JobData } from '@/components/jobs/AllJobsTable';
@@ -8,6 +9,17 @@ import { getJobs, JobFilters } from '@/actions/jobActions';
 import { Search, RotateCcw, Building2, Briefcase, Filter, Calendar, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function SearchJobsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading search...</div>}>
+      <SearchJobsContent />
+    </Suspense>
+  );
+}
+
+function SearchJobsContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<JobData[]>([]);
@@ -15,9 +27,8 @@ export default function SearchJobsPage() {
 
   // Filter States
   const [clientName, setClientName] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [status, setStatus] = useState<string[]>([]);
-  const [category, setCategory] = useState<string[]>([]);
   const [currency, setCurrency] = useState('BOTH');
   
   // Date Ranges
@@ -33,8 +44,7 @@ export default function SearchJobsPage() {
     const filters: JobFilters = {
       clientName: clientName || undefined,
       searchQuery: searchQuery || undefined,
-      status: status.length > 0 ? status : undefined,
-      category: category.length > 0 ? category : undefined,
+      status: status.length > 0 ? status.join(',') : undefined,
       currency: currency !== 'BOTH' ? currency : undefined,
       commencementStart: commencementStart || undefined,
       commencementEnd: commencementEnd || undefined,
@@ -63,11 +73,17 @@ export default function SearchJobsPage() {
     }
   };
 
+  useEffect(() => {
+    if (initialQuery && !hasSearched) {
+      handleSearch();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
+
   const handleClearFilters = () => {
     setClientName('');
     setSearchQuery('');
     setStatus([]);
-    setCategory([]);
     setCurrency('BOTH');
     setCommencementStart('');
     setCommencementEnd('');
@@ -125,7 +141,7 @@ export default function SearchJobsPage() {
                   <input 
                     type="text" 
                     placeholder="Exact client name..." 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                   />
@@ -137,7 +153,7 @@ export default function SearchJobsPage() {
                   <input 
                     type="text" 
                     placeholder="Search by Title or Description..." 
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm text-gray-900 placeholder-gray-500 bg-slate-50"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -162,20 +178,6 @@ export default function SearchJobsPage() {
                      ))}
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Service Category</label>
-                  <div className="flex flex-wrap gap-2">
-                     {['Tax Advisory', 'Audit & Assurance', 'Accountancy Services', 'Financial Consulting', 'Others'].map(c => (
-                       <button 
-                         key={c}
-                         onClick={() => toggleArrayItem(setCategory, c)}
-                         className={`text-xs px-2.5 py-1.5 rounded-md border font-medium transition-colors ${category.includes(c) ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-500 border-gray-200 hover:bg-slate-50'}`}
-                       >
-                         {c}
-                       </button>
-                     ))}
-                  </div>
-                </div>
             </div>
 
             {/* Column 3: Dates */}
@@ -187,14 +189,14 @@ export default function SearchJobsPage() {
                   <div className="flex items-center gap-2">
                       <input 
                         type="date"
-                        className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 text-gray-600 outline-none"
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 text-gray-900 outline-none"
                         value={commencementStart}
                         onChange={(e) => setCommencementStart(e.target.value)}
                       />
                       <span className="text-gray-400">to</span>
                       <input 
                         type="date"
-                        className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 text-gray-600 outline-none"
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 text-gray-900 outline-none"
                         value={commencementEnd}
                         onChange={(e) => setCommencementEnd(e.target.value)}
                       />

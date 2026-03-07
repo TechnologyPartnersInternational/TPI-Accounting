@@ -45,3 +45,24 @@ export async function getRecentJobs(limit = 10) {
     
   return JSON.parse(JSON.stringify(jobs));
 }
+
+export async function getUpcomingDeadlines(limit = 3) {
+  await connectToDatabase();
+  const jobs = await JobRecord.find({
+    status: { $regex: /^(Started|Pending|Ongoing|Yet to commence)$/i },
+    dueDate: { $gte: new Date() }
+  })
+    .sort({ dueDate: 1 })
+    .limit(limit)
+    .lean();
+  return JSON.parse(JSON.stringify(jobs));
+}
+
+export async function getSystemActivity(limit = 3) {
+  await connectToDatabase();
+  const jobs = await JobRecord.find()
+    .sort({ updatedAt: -1 })
+    .limit(limit)
+    .lean();
+  return JSON.parse(JSON.stringify(jobs));
+}

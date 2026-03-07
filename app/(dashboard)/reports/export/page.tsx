@@ -50,8 +50,16 @@ export default function ExportDataPage() {
       if (endDate) query.append('endDate', endDate);
 
       // Call the API endpoint we've set up
-      const response = await fetch(`/api/export?${query.toString()}`, {
-        method: 'GET',
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ids: selectedClients,
+          filters: {
+            commencementStart: startDate || undefined,
+            commencementEnd: endDate || undefined
+          }
+        })
       });
 
       if (!response.ok) throw new Error('Export failed');
@@ -74,7 +82,7 @@ export default function ExportDataPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 w-full pb-12">
       <div className="border-b border-gray-200 pb-5">
         <h1 className="text-2xl font-bold text-[#0f172a]">Export Data</h1>
         <p className="text-sm text-gray-500 mt-1">Generate custom Excel reports for your clients and jobs</p>
@@ -91,12 +99,12 @@ export default function ExportDataPage() {
         <div className="p-6 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search clients..." 
+            <input
+              type="text"
+              placeholder="Search clients..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 bg-slate-50"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-shadow"
             />
           </div>
 

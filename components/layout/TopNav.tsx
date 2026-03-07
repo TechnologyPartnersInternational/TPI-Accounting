@@ -2,9 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Search, Bell, User } from 'lucide-react';
+import { useState } from 'react';
 
 export function TopNav() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10 w-full">
@@ -22,16 +31,18 @@ export function TopNav() {
 
       {/* Middle: Universal Search Bar */}
       <div className="hidden lg:flex justify-center flex-1 lg:w-1/3">
-        <div className="relative w-full max-w-md group">
+        <form onSubmit={handleSearch} className="relative w-full max-w-md group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={16} className="text-gray-400 group-focus-within:text-[#0f172a] transition-colors" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0f172a] focus:border-[#0f172a] bg-gray-50 focus:bg-white transition-all"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-full text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#0f172a] focus:border-[#0f172a] bg-gray-50 focus:bg-white transition-all"
             placeholder="Search clients, jobs, or ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </form>
       </div>
 
       {/* Right: Notifications & User Profile */}

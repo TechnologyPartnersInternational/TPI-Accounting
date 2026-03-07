@@ -55,7 +55,6 @@ export function Sidebar() {
       title: 'Settings',
       items: [
         { label: 'Currency Rates', href: '/settings/currency', icon: DollarSign },
-        { label: 'User Management', href: '/settings/users', icon: Settings },
       ]
     }
   ];

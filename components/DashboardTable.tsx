@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { JobRecordInput } from '@/actions/jobActions';
+import Link from 'next/link';
 
 interface JobData extends JobRecordInput {
   _id: string;
@@ -14,6 +15,16 @@ interface DashboardTableProps {
 
 export function DashboardTable({ jobs }: DashboardTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.clientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          job.jobDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter ? job.category === categoryFilter : true;
+    const matchesMonth = monthFilter ? new Date(job.dueDate).getMonth() === parseInt(monthFilter) : true;
+    return matchesSearch && matchesCategory && matchesMonth;
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -47,25 +58,53 @@ export function DashboardTable({ jobs }: DashboardTableProps) {
             <input 
               type="text" 
               placeholder="Search by Client" 
-              className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-48 focus:outline-none focus:ring-1 focus:ring-[#0f172a]"
+              className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-48 focus:outline-none focus:ring-1 focus:ring-[#0f172a] text-gray-900 placeholder-gray-500 bg-slate-50"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           
           {/* Filters */}
-          <button className="flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-            Filter by Month <ChevronDown size={14} className="ml-2" />
-          </button>
-          <button className="flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-            Filter by Category <ChevronDown size={14} className="ml-2" />
-          </button>
+          <div className="relative">
+            <select 
+              className="appearance-none flex items-center px-4 py-2 pr-8 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 bg-white focus:outline-none focus:ring-1 focus:ring-[#0f172a]"
+              value={monthFilter}
+              onChange={(e) => setMonthFilter(e.target.value)}
+            >
+              <option value="">All Months</option>
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i.toString()}>
+                  {new Date(0, i).toLocaleString('en-US', { month: 'short' })}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+          
+          <div className="relative">
+            <select 
+              className="appearance-none flex items-center px-4 py-2 pr-8 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 bg-white focus:outline-none focus:ring-1 focus:ring-[#0f172a]"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              <option value="Tax Advisory">Tax Advisory</option>
+              <option value="Audit & Assurance">Audit & Assurance</option>
+              <option value="Accountancy Services">Accountancy Services</option>
+              <option value="Financial Consulting">Financial Consulting</option>
+              <option value="Others">Others</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
         </div>
 
         {/* CTA Button */}
-        <button className="bg-[#0f172a] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center shadow-sm">
+        <Link 
+          href="/jobs/new"
+          className="bg-[#0f172a] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center shadow-sm whitespace-nowrap"
+        >
           <span className="mr-1.5 text-lg leading-none">+</span> Log New Job
-        </button>
+        </Link>
       </div>
 
       {/* Table */}
@@ -84,14 +123,14 @@ export function DashboardTable({ jobs }: DashboardTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 opacity-90 text-gray-700">
-            {jobs.length === 0 ? (
+            {filteredJobs.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                  No jobs found. Click "Log New Job" to get started.
+                  No jobs found matching your filters.
                 </td>
               </tr>
             ) : (
-              jobs.map((job) => (
+              filteredJobs.map((job) => (
                 <tr key={job._id.toString()} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 font-semibold text-[#0f172a]">{job.clientName}</td>
                   <td className="px-6 py-4 text-gray-500">{job.jobDescription}</td>
