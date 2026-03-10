@@ -7,6 +7,8 @@ export const metadata = {
   title: 'Client List | TPI Accounting',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ClientListPage({
   searchParams,
 }: {

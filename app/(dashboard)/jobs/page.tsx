@@ -5,6 +5,8 @@ export const metadata = {
   title: 'All Jobs | TPI Accounting',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function AllJobsPage({
   searchParams,
 }: {

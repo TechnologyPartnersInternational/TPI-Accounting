@@ -6,6 +6,8 @@ import { JobsStatusChart } from '@/components/dashboard/JobsStatusChart';
 import { getJobs } from '@/actions/jobActions';
 import { getClientSummaries } from '@/actions/clientActions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardClientPage({
   searchParams,
 }: {
