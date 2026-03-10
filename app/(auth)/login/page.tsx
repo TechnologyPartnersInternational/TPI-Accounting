@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Flag, LogIn, ShieldAlert } from 'lucide-react';
 import { loginUser } from '@/actions/authActions';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -24,8 +25,7 @@ export default function LoginPage() {
         {/* Header / Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="mb-4 text-[#0f172a]">
-            {/* Using a solid-filled flag icon by increasing strokeWidth or using fill */}
-            <Flag size={48} strokeWidth={1.5} fill="#0f172a" stroke="#0f172a" />
+            <Image src="/favicon.ico" alt="TPI Accounting" width={48} height={48} />
           </div>
           <h1 className="text-2xl font-bold text-[#0f172a] mb-1">TPI Accounting</h1>
           <p className="text-sm font-semibold text-gray-400 tracking-wider">SYSTEM LOGIN</p>

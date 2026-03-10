@@ -71,9 +71,16 @@ export async function loginUser(formData: FormData) {
       return { error: 'Invalid credentials. Please contact IT support.' };
     }
     
-  } catch (error) {
-    console.error('Authentication error:', error);
-    return { error: 'A server error occurred during login. Please try again.' };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Authentication error:', err.message);
+    
+    // Help user identify connection issues in production
+    if (err.message?.includes('MONGODB_URI') || err.message?.includes('connection') || err.message?.includes('buffering timed out')) {
+      return { error: 'Database connection failed. Please check if MONGODB_URI is set in Vercel and your IP is whitelisted on Atlas.' };
+    }
+    
+    return { error: `Server error: ${err.message || 'Please try again.'}` };
   }
   
   // Successful auth redirection MUST happen outside try/catch to work in Next.js Server Actions
