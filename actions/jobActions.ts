@@ -2,6 +2,7 @@
 
 import connectToDatabase from '../lib/db';
 import { JobRecord } from '../models/JobRecord';
+import { Client } from '../models/Client';
 import { revalidatePath } from 'next/cache';
 
 export type ActionResponse<T = unknown> = {
@@ -266,8 +267,24 @@ export async function bulkCreateJobs(jobs: JobRecordInput[]): Promise<ActionResp
 
     const result = await JobRecord.insertMany(validatedJobs);
 
+    // Synchronize Client records
+    const uniqueClientNames = [...new Set(validatedJobs.map(j => j.clientName))];
+    
+    // Using a loop to avoid large bulk operations if not needed, but efficient enough for typical imports
+    for (const clientName of uniqueClientNames) {
+      // Case-insensitive check and upsert
+      await Client.findOneAndUpdate(
+        { clientName: { $regex: new RegExp(`^${clientName}$`, 'i') } },
+        { $setOnInsert: { clientName } },
+        { upsert: true, new: true }
+      );
+    }
+
     revalidatePath('/jobs');
     revalidatePath('/dashboard');
+    revalidatePath('/clients');
+    revalidatePath('/jobs/new');
+    revalidatePath('/reports/export');
     
     return {
       success: true,
