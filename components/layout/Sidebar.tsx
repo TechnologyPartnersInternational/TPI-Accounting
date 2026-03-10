@@ -12,11 +12,10 @@ import {
   BarChart3,
   Download,
   DollarSign,
-  Settings,
   Menu,
   ChevronLeft,
-  ChevronRight,
-  Flag
+  Flag,
+  Upload
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -35,6 +34,7 @@ export function Sidebar() {
       items: [
         { label: 'New Job Entry', href: '/jobs/new', icon: FilePlus },
         { label: 'All Jobs', href: '/jobs', icon: List },
+        { label: 'Bulk Upload', href: '/jobs/bulk', icon: Upload },
       ]
     },
     {
@@ -91,7 +91,11 @@ export function Sidebar() {
             )}
             
             {group.items.map((item) => {
-              const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/');
+              const isActive = pathname === item.href || (
+                pathname.startsWith(item.href + '/') && 
+                item.href !== '/' && 
+                !navGroups.some(g => g.items.some(i => i.href !== item.href && pathname.startsWith(i.href)))
+              );
               
               return (
                 <Link 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Eye, Edit } from 'lucide-react';
 import { JobRecordInput } from '@/actions/jobActions';
 import Link from 'next/link';
 
@@ -120,6 +120,7 @@ export function DashboardTable({ jobs }: DashboardTableProps) {
               <th className="px-6 py-4 text-right">Outstanding</th>
               <th className="px-6 py-4">Due Date</th>
               <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 opacity-90 text-gray-700">
@@ -146,6 +147,24 @@ export function DashboardTable({ jobs }: DashboardTableProps) {
                     {new Date(job.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="px-6 py-4">{getStatusBadge(job.status || 'PENDING')}</td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Link 
+                        href={`/jobs/${job._id}`}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors" 
+                        title="View Details"
+                      >
+                        <Eye size={16} />
+                      </Link>
+                      <Link 
+                        href={`/jobs/${job._id}/edit`}
+                        className="p-1 text-gray-400 hover:text-amber-600 transition-colors" 
+                        title="Edit Job"
+                      >
+                        <Edit size={16} />
+                      </Link>
+                    </div>
+                  </td>
                 </tr>
               ))
             )}

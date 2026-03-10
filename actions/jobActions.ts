@@ -185,3 +185,100 @@ export async function getMonthlySummary(month: number, year: number): Promise<Ac
     };
   }
 }
+
+export async function getJobById(id: string): Promise<ActionResponse> {
+  try {
+    await connectToDatabase();
+    const job = await JobRecord.findById(id).lean();
+    
+    if (!job) {
+      return {
+        success: false,
+        error: 'Job record not found',
+      };
+    }
+    
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(job)),
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch job details';
+    console.error('Error fetching job by ID:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
+
+export async function updateJob(id: string, data: Partial<JobRecordInput>): Promise<ActionResponse> {
+  try {
+    await connectToDatabase();
+    
+    const updatedJob = await JobRecord.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedJob) {
+      return {
+        success: false,
+        error: 'Job record not found',
+      };
+    }
+
+    revalidatePath('/jobs');
+    revalidatePath(`/clients`); // Revalidate all client pages just in case
+    
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(updatedJob)),
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update job';
+    console.error('Error updating job:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
+
+export async function bulkCreateJobs(jobs: JobRecordInput[]): Promise<ActionResponse> {
+  try {
+    await connectToDatabase();
+    
+    // Validate each job (optional but recommended for robustness)
+    const validatedJobs = jobs.map(job => {
+      // Basic validation: ensure required fields are present
+      if (!job.clientName || !job.jobDescription || !job.category || !job.agreedPrice || !job.currency || !job.startDate || !job.dueDate) {
+        throw new Error(`Invalid job data: Missing required fields for job with client ${job.clientName || 'Unknown'}`);
+      }
+      return {
+        ...job,
+        status: job.status || 'Pending',
+        amountPaid: job.amountPaid || 0,
+        // outstandingBalance will be handled by pre-save hook
+      };
+    });
+
+    const result = await JobRecord.insertMany(validatedJobs);
+
+    revalidatePath('/jobs');
+    revalidatePath('/dashboard');
+    
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(result)),
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to bulk create jobs';
+    console.error('Error bulk creating jobs:', errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}

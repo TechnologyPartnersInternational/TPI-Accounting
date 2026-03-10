@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ChevronLeft, ChevronRight, Edit, Eye, Filter, Download } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Edit, Eye, Filter, Download, Upload } from 'lucide-react';
 import { JobRecordInput } from '@/actions/jobActions';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { BulkUploadModal } from './BulkUploadModal';
 
 export interface JobData extends JobRecordInput {
   _id: string;
@@ -21,6 +23,7 @@ export function AllJobsTable({ jobs, totalJobs }: AllJobsTableProps) {
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const formatCurrency = (amount: number, currency: 'NGN' | 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -167,8 +170,22 @@ export function AllJobsTable({ jobs, totalJobs }: AllJobsTableProps) {
             <Download size={16} />
             Export View
           </button>
+          
+          <button 
+            onClick={() => setIsUploadModalOpen(true)}
+            className="px-4 py-2 bg-[#0f172a] text-white font-medium rounded-lg text-sm transition-colors hover:bg-slate-800 flex items-center gap-2"
+          >
+            <Upload size={16} />
+            Bulk Import
+          </button>
         </div>
       </div>
+
+      <BulkUploadModal 
+        isOpen={isUploadModalOpen} 
+        onClose={() => setIsUploadModalOpen(false)} 
+        onSuccess={() => router.refresh()} 
+      />
 
       {/* The Table Container */}
       <div className="overflow-x-auto">
@@ -208,7 +225,7 @@ export function AllJobsTable({ jobs, totalJobs }: AllJobsTableProps) {
                 </td>
               </tr>
             ) : (
-              groupedJobs.map((group, groupIndex) => 
+              groupedJobs.map((group) => 
                 group.jobs.map((job, jobIndex) => {
                   const isFirstRowOfClient = jobIndex === 0;
                   const amtPaid = job.amountPaid || 0;
@@ -267,12 +284,20 @@ export function AllJobsTable({ jobs, totalJobs }: AllJobsTableProps) {
                       {/* Actions */}
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <button className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="View Details">
+                          <Link 
+                            href={`/jobs/${job._id}`}
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" 
+                            title="View Details"
+                          >
                             <Eye size={16} />
-                          </button>
-                          <button className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors" title="Edit Job">
+                          </Link>
+                          <Link 
+                            href={`/jobs/${job._id}/edit`}
+                            className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors" 
+                            title="Edit Job"
+                          >
                             <Edit size={16} />
-                          </button>
+                          </Link>
                         </div>
                       </td>
                     </tr>

@@ -2,12 +2,16 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createJob, JobRecordInput } from '@/actions/jobActions';
+import { createJob, updateJob, JobRecordInput } from '@/actions/jobActions';
 import { getClients } from '@/actions/clientActions';
 import { AddClientModal } from '@/components/clients/AddClientModal';
 import { Search, Plus, Calendar, DollarSign, PenTool, CheckCircle, Package } from 'lucide-react';
 
-export function NewJobForm() {
+interface NewJobFormProps {
+  initialData?: JobRecordInput & { _id: string };
+}
+
+export function NewJobForm({ initialData }: NewJobFormProps) {
   const router = useRouter();
   
   // -- State variables --
@@ -23,7 +27,7 @@ export function NewJobForm() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Form Field State
-  const [formData, setFormData] = useState<Partial<JobRecordInput>>({
+  const [formData, setFormData] = useState<Partial<JobRecordInput>>(initialData || {
     clientName: '',
     category: '',
     currency: 'NGN',
@@ -32,9 +36,26 @@ export function NewJobForm() {
     status: 'Ongoing',
   });
 
+  // Handle setting client search text if initialData exists
+  useEffect(() => {
+    if (initialData?.clientName) {
+      setClientSearchText(initialData.clientName);
+    }
+  }, [initialData]);
+
   // Derived Fields
   const outstandingBalance = (formData.agreedPrice || 0) - (formData.amountPaid || 0);
   
+  // -- Handlers --
+  const fetchClients = async (search = '') => {
+    setIsSearchingClients(true);
+    const result = await getClients(search);
+    if (result.success && result.data) {
+      setClients(result.data as {clientName: string}[]);
+    }
+    setIsSearchingClients(false);
+  };
+
   // -- Effects --
   useEffect(() => {
     // Fetch clients on mount
@@ -48,16 +69,6 @@ export function NewJobForm() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // -- Handlers --
-  const fetchClients = async (search = '') => {
-    setIsSearchingClients(true);
-    const result = await getClients(search);
-    if (result.success && result.data) {
-      setClients(result.data as {clientName: string}[]);
-    }
-    setIsSearchingClients(false);
-  };
 
   const handleClientSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -96,12 +107,19 @@ export function NewJobForm() {
       return;
     }
 
-    const { success, error: submitError } = await createJob(formData as JobRecordInput);
+    let response;
+    if (initialData?._id) {
+      response = await updateJob(initialData._id, formData as JobRecordInput);
+    } else {
+      response = await createJob(formData as JobRecordInput);
+    }
+    
+    const { success, error: submitError } = response;
     
     if (success) {
       router.push('/jobs'); // Standard redirect back to the All Jobs table
     } else {
-      setError(submitError || 'Failed to successfully create the job record.');
+      setError(submitError || `Failed to successfully ${initialData ? 'update' : 'create'} the job record.`);
       setIsSubmitting(false);
     }
   };
@@ -184,8 +202,8 @@ export function NewJobForm() {
                 
                 {showDropdown && clients.length === 0 && !isSearchingClients && clientSearchText && (
                   <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-center text-sm text-gray-500">
-                    No clients found matching "{clientSearchText}". <br />
-                    Click "+ Add New Client" above.
+                    No clients found matching &ldquo;{clientSearchText}&rdquo;. <br />
+                    Click &ldquo;+ Add New Client&rdquo; above.
                   </div>
                 )}
               </div>
@@ -409,7 +427,7 @@ export function NewJobForm() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             ) : <DollarSign size={16} />}
-            {isSubmitting ? 'Processing Entry...' : 'Submit New Job Recording'}
+            {isSubmitting ? 'Processing Entry...' : initialData ? 'Update Job Recording' : 'Submit New Job Recording'}
           </button>
         </div>
       </form>

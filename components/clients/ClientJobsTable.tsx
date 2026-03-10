@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight, Edit, Eye, Filter, Download } from 'lucide-react';
 import { JobData } from '@/components/jobs/AllJobsTable';
+import Link from 'next/link';
 
 interface ClientJobsTableProps {
   jobs: JobData[];
@@ -224,12 +225,20 @@ export function ClientJobsTable({ jobs, clientName }: ClientJobsTableProps) {
                     {/* Actions */}
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" title="View Details">
+                        <Link 
+                          href={`/jobs/${job._id}`}
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors" 
+                          title="View Details"
+                        >
                           <Eye size={16} />
-                        </button>
-                        <button className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors" title="Edit Job">
+                        </Link>
+                        <Link 
+                          href={`/jobs/${job._id}/edit`}
+                          className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors" 
+                          title="Edit Job"
+                        >
                           <Edit size={16} />
-                        </button>
+                        </Link>
                       </div>
                     </td>
                   </tr>
