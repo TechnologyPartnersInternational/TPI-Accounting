@@ -49,8 +49,7 @@ export async function getRecentJobs(limit = 10) {
 export async function getUpcomingDeadlines(limit = 3) {
   await connectToDatabase();
   const jobs = await JobRecord.find({
-    status: { $regex: /^(Started|Pending|Ongoing|Yet to commence)$/i },
-    dueDate: { $gte: new Date() }
+    status: { $in: ['Started', 'Pending', 'Ongoing', 'Yet to commence', 'Overdue'] },
   })
     .sort({ dueDate: 1 })
     .limit(limit)

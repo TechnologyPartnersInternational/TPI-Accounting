@@ -149,10 +149,20 @@ export async function getClientSummaries(searchTerm?: string): Promise<ActionRes
         $addFields: {
           ngnTotalValue: { $sum: '$ngnJobs.agreedPrice' },
           ngnTotalPaid: { $sum: '$ngnJobs.amountPaid' },
-          ngnTotalOutstanding: { $sum: '$ngnJobs.outstandingBalance' },
+          ngnTotalOutstanding: { 
+            $subtract: [
+              { $sum: '$ngnJobs.agreedPrice' },
+              { $sum: '$ngnJobs.amountPaid' }
+            ]
+          },
           usdTotalValue: { $sum: '$usdJobs.agreedPrice' },
           usdTotalPaid: { $sum: '$usdJobs.amountPaid' },
-          usdTotalOutstanding: { $sum: '$usdJobs.outstandingBalance' },
+          usdTotalOutstanding: {
+            $subtract: [
+              { $sum: '$usdJobs.agreedPrice' },
+              { $sum: '$usdJobs.amountPaid' }
+            ]
+          },
         },
       },
       {

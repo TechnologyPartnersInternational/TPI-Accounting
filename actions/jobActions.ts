@@ -261,7 +261,7 @@ export async function bulkCreateJobs(jobs: JobRecordInput[]): Promise<ActionResp
         ...job,
         status: job.status || 'Pending',
         amountPaid: job.amountPaid || 0,
-        // outstandingBalance will be handled by pre-save hook
+        outstandingBalance: (job.agreedPrice || 0) - (job.amountPaid || 0),
       };
     });
 
