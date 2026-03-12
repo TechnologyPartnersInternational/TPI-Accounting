@@ -21,7 +21,7 @@ export default async function ClientListPage({
   const clients = (result.data || []) as ClientSummary[];
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#0f172a]">Client List</h1>

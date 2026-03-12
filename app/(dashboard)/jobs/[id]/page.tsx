@@ -47,7 +47,7 @@ export default async function JobDetailPage({
   const outstanding = job.agreedPrice - amtPaid;
 
   return (
-    <div className="max-w-[1000px] mx-auto space-y-8 pb-12">
+    <div className="w-full mx-auto space-y-8 pb-12">
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Link 
